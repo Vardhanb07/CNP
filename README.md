@@ -3,6 +3,7 @@ Design of a Priority-Based Packet Scheduling Mechanism
 ## description
 This project designs a packet scheduling system that assigns different priority levels to network packets.
 ## tcp/ip stack level
+```
 ┌─────────────────────────────────────────┐
 │ Application Layer (HTTP, VoIP, Video)   │
 ├─────────────────────────────────────────┤
@@ -16,5 +17,6 @@ This project designs a packet scheduling system that assigns different priority 
 ├─────────────────────────────────────────┤
 │ Physical Layer (Bits, Wire, Radio)      │
 └─────────────────────────────────────────┘
+```
 ## type
 software
