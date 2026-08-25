@@ -64,5 +64,6 @@ func (rn *RouterNode) Transfer(packet *base.Packet) {
 				node.Transfer(&p)
 			}
 		}
+		rn.packetStore.Discard()
 	}
 }

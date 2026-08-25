@@ -47,3 +47,10 @@ func (s *Store[T]) Len() int {
 	defer s.mu.Unlock()
 	return len(s.items)
 }
+
+func (s *Store[T]) Discard() {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	var def []T
+	s.items = def
+}
