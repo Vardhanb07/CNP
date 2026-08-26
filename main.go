@@ -13,14 +13,14 @@ func main() {
 	end1node := node.NewEndNode(1, "end-1")
 	end2node := node.NewEndNode(2, "end-2")
 	end3node := node.NewEndNode(3, "end-3")
-	router1node := node.NewRouterNode("router-1", 500)
+	router1node := node.NewRouterNode("router-1", 10)
 	end1node.SetNext(router1node)
 	end2node.SetNext(router1node)
 	end3node.SetNext(router1node)
 	end4node := node.NewEndNode(4, "end-4")
 	router1node.SetNext(end4node)
 	wg := sync.WaitGroup{}
-	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(time.Millisecond*3))
+	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(time.Microsecond*9000))
 	defer cancel()
 	wg.Add(4)
 	// end1node

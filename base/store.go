@@ -36,7 +36,7 @@ func (s *Store[T]) At(idx int) (T, bool) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	var def T
-	if 0 > idx && idx >= len(s.items) {
+	if 0 > idx || idx >= len(s.items) {
 		return def, false
 	}
 	return s.items[idx], true
@@ -48,9 +48,12 @@ func (s *Store[T]) Len() int {
 	return len(s.items)
 }
 
+func (s *Store[T]) Limit() int {
+	return s.limit
+}
+
 func (s *Store[T]) Discard() {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	var def []T
-	s.items = def
+	s.items = []T{}
 }

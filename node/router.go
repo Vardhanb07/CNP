@@ -1,19 +1,21 @@
 package node
 
 import (
+	"fmt"
+
 	"github.com/Vardhanb07/CNP/base"
 	"go.uber.org/zap"
 )
 
 type RouterNode struct {
 	name        string
-	packetStore *base.Store[base.Packet]
-	nodeStore   *base.Store[base.Node]
+	packetStore *base.Store[*base.Packet]
+	nodeStore   *base.LStore[base.Node]
 }
 
 func NewRouterNode(name string, limit int) *RouterNode {
-	ps := base.NewStore[base.Packet](limit)
-	ns := base.NewStore[base.Node](limit)
+	ps := base.NewStore[*base.Packet](limit)
+	ns := base.NewLStore[base.Node]()
 	return &RouterNode{name: name, packetStore: ps, nodeStore: ns}
 }
 
@@ -22,17 +24,8 @@ func (rn *RouterNode) Name() string {
 }
 
 func (rn *RouterNode) SetNext(nodes ...base.Node) {
-	logger := zap.Must(zap.NewDevelopment())
-	defer logger.Sync()
 	for _, n := range nodes {
-		ok := rn.nodeStore.Set(n)
-		if !ok {
-			logger.Info(
-				"nodeStore.Set failed",
-				zap.String("name", rn.Name()),
-				zap.String("type", "router"),
-			)
-		}
+		rn.nodeStore.Set(n)
 	}
 }
 
@@ -52,7 +45,7 @@ func (rn *RouterNode) Transfer(packet *base.Packet) {
 		)
 		return
 	}
-	ok := rn.packetStore.Set(*packet)
+	ok := rn.packetStore.Set(packet)
 	if !ok {
 		logger.Info(
 			"packetStore is full",
@@ -61,9 +54,18 @@ func (rn *RouterNode) Transfer(packet *base.Packet) {
 		)
 		for _, p := range rn.packetStore.Get() {
 			for _, node := range nodes {
-				node.Transfer(&p)
+				node.Transfer(p)
 			}
 		}
 		rn.packetStore.Discard()
+		rn.packetStore.Set(packet)
 	}
+	logger.Info(
+		fmt.Sprintf("packet transfered to %v", rn.Name()),
+		zap.String("name", rn.Name()),
+		zap.String("type", "router"),
+		zap.String("packet::data", string(packet.Data)),
+		zap.Int("packet::priority", packet.GetPriority()),
+		zap.Int("limit::remaining", rn.packetStore.Limit()-rn.packetStore.Len()),
+	)
 }
