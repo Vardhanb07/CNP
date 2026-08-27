@@ -19,7 +19,7 @@ func NewStore[T any](limit int) *Store[T] {
 func (s *Store[T]) Set(item T) bool {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	if len(s.items) > s.limit {
+	if len(s.items) >= s.limit {
 		return false
 	}
 	s.items = append(s.items, item)

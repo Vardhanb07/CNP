@@ -20,9 +20,9 @@ func main() {
 	end4node := node.NewEndNode(4, "end-4")
 	router1node.SetNext(end4node)
 	wg := sync.WaitGroup{}
-	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(time.Microsecond*9000))
+	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(time.Millisecond*300))
 	defer cancel()
-	wg.Add(4)
+	wg.Add(3)
 	// end1node
 	go func() {
 		defer wg.Done()
@@ -31,7 +31,7 @@ func main() {
 			case <-ctx.Done():
 				return
 			default:
-				p := base.NewPacket([]byte("transfer from end1node to router1node"))
+				p := base.NewPacket([]byte("transfer from end1node to router1node"), 4)
 				end1node.Transfer(p)
 			}
 		}
@@ -44,7 +44,7 @@ func main() {
 			case <-ctx.Done():
 				return
 			default:
-				p := base.NewPacket([]byte("transfer from end2node to router1node"))
+				p := base.NewPacket([]byte("transfer from end2node to router1node"), 1)
 				end2node.Transfer(p)
 			}
 		}
@@ -57,21 +57,8 @@ func main() {
 			case <-ctx.Done():
 				return
 			default:
-				p := base.NewPacket([]byte("transfer from end3node to router1node"))
+				p := base.NewPacket([]byte("transfer from end3node to router1node"), 3)
 				end3node.Transfer(p)
-			}
-		}
-	}()
-	// router1node
-	go func() {
-		defer wg.Done()
-		for {
-			select {
-			case <-ctx.Done():
-				return
-			default:
-				p := base.NewPacket([]byte("transfer from router1node to end4node"))
-				router1node.Transfer(p)
 			}
 		}
 	}()

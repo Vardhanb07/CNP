@@ -46,10 +46,11 @@ func (en *EndNode) Transfer(packet *base.Packet) {
 				"packetStore is empty, no transfer",
 				zap.String("name", en.Name()),
 				zap.String("type", "end"),
-				zap.String("packet::data", string(p.Data)),
+				zap.String("packet::data", string(p.GetData())),
 				zap.Int("packet::priority", p.GetPriority()),
 			)
 		}
+		en.packetStore.Discard()
 		return
 	}
 	for _, p := range en.packetStore.Get() {
@@ -58,7 +59,7 @@ func (en *EndNode) Transfer(packet *base.Packet) {
 				fmt.Sprintf("transfer from %v to %v", en.Name(), node.Name()),
 				zap.String("name", en.Name()),
 				zap.String("type", "end"),
-				zap.String("packet::data", string(p.Data)),
+				zap.String("packet::data", string(p.GetData())),
 				zap.Int("packet::priority", p.GetPriority()),
 			)
 			node.Transfer(p)

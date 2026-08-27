@@ -10,13 +10,15 @@ import (
 type RouterNode struct {
 	name        string
 	packetStore *base.Store[*base.Packet]
+	packetQueue *base.PacketPriorityQueue
 	nodeStore   *base.LStore[base.Node]
 }
 
 func NewRouterNode(name string, limit int) *RouterNode {
 	ps := base.NewStore[*base.Packet](limit)
 	ns := base.NewLStore[base.Node]()
-	return &RouterNode{name: name, packetStore: ps, nodeStore: ns}
+	pq := base.NewPacketPriorityQueue()
+	return &RouterNode{name: name, packetStore: ps, nodeStore: ns, packetQueue: pq}
 }
 
 func (rn *RouterNode) Name() string {
@@ -53,8 +55,16 @@ func (rn *RouterNode) Transfer(packet *base.Packet) {
 			zap.String("type", "router"),
 		)
 		for _, p := range rn.packetStore.Get() {
+			rn.packetQueue.Push(p)
+		}
+		for {
+			p, ok := rn.packetQueue.Pop()
+			if !ok {
+				break
+			}
 			for _, node := range nodes {
-				node.Transfer(p)
+				np := base.NewPacket(fmt.Appendf(p.GetData(), "from %v", rn.Name()), p.GetPriority())
+				node.Transfer(np)
 			}
 		}
 		rn.packetStore.Discard()
@@ -64,7 +74,7 @@ func (rn *RouterNode) Transfer(packet *base.Packet) {
 		fmt.Sprintf("packet transfered to %v", rn.Name()),
 		zap.String("name", rn.Name()),
 		zap.String("type", "router"),
-		zap.String("packet::data", string(packet.Data)),
+		zap.String("packet::data", string(packet.GetData())),
 		zap.Int("packet::priority", packet.GetPriority()),
 		zap.Int("limit::remaining", rn.packetStore.Limit()-rn.packetStore.Len()),
 	)

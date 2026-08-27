@@ -18,7 +18,7 @@ func (pq PriorityQueue) Len() int {
 }
 
 func (pq PriorityQueue) Less(i, j int) bool {
-	return pq[i].p.Priority > pq[j].p.Priority
+	return pq[i].p.GetPriority() < pq[j].p.GetPriority()
 }
 
 func (pq PriorityQueue) Swap(i, j int) {

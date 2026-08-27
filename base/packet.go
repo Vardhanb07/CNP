@@ -1,14 +1,18 @@
 package base
 
 type Packet struct {
-	Data     []byte
-	Priority int
+	data     []byte
+	priority int
 }
 
-func NewPacket(data []byte) *Packet {
-	return &Packet{Data: data}
+func NewPacket(data []byte, priority int) *Packet {
+	return &Packet{data: data, priority: priority}
 }
 
 func (p *Packet) GetPriority() int {
-	return p.Priority
+	return p.priority
+}
+
+func (p *Packet) GetData() []byte {
+	return p.data
 }
